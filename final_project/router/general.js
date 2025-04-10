@@ -88,17 +88,26 @@ public_users.get('/author/:author', async (req, res) => {
 });
 
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
+function getBooksByTitle(title) {
+  return new Promise((resolve, reject) => {
+    const matchingBooks = Object.values(books).filter(
+      book => book.title === title
+    );
+    if (matchingBooks.length > 0) {
+      resolve(matchingBooks);
+    } else {
+      reject('No books found with this title');
+    }
+  });
+}
+
+public_users.get('/title/:title', async (req, res) => {
   const title = req.params.title;
-
-  const matchingBooks = Object.values(books).filter(
-    book => book.title === title
-  );
-
-  if (matchingBooks.length > 0) {
-    return res.status(200).json(matchingBooks);
-  } else {
-    return res.status(404).json({ message: 'No books found with this title' });
+  try {
+    const results = await getBooksByTitle(title);
+    return res.status(200).json(results);
+  } catch (err) {
+    return res.status(404).json({ message: err });
   }
 });
 
